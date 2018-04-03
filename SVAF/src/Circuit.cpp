@@ -39,7 +39,7 @@ string GetTimeString();
 
 // 构造函数，执行初始化
 Circuit::Circuit(SvafTask& svafTask, bool gui_mode) : 
-	layers_(svafTask), 
+	layers_(svafTask),		// 会自动调用Param类的构造函数，进行svafTask中各层信息向hash_map中的转存，数据流的初始化等工作
 	guiMode_(gui_mode),
 	useMapping_(gui_mode),
 	linklist_(NULL), 
@@ -111,14 +111,14 @@ void Circuit::Build(){
 	while (p){
 		LOG(INFO) << "Destroy Layer [" << p->name << "].";
 		q = p->next;
-		delete p->layer;
+		delete p->layer;	// 一个疑问：将基类指针指向派生类，而基类的构造函数不是virtul的，是否会造成内存泄漏？
 		delete p;
 		p = q;
 	}
 	// 读入各个节点
 	linklist_ = NULL;
 	for (int i = 0; i < 1 + layers_.Size(); ++i){
-		if (layers_[i].name() == layers_[i].bottom()){
+		if (layers_[i].name() == layers_[i].bottom()){				// 先构造输入层
 			linklist_ = new Node(layers_[i].name());
 			LOG(INFO) << linklist_->name << " -> ";
 			break;
@@ -128,7 +128,7 @@ void Circuit::Build(){
 	// 创建链表
 	p = linklist_;
 	while (true){
-		if (layers_[p->name].name() == layers_[p->name].top()){
+		if (layers_[p->name].name() == layers_[p->name].top()){		// 最后一层
 			LOG(INFO) << "Build All Layers.";
 			break;
 		}
@@ -146,7 +146,7 @@ void Circuit::Build(){
 	while (p){
 		auto type = layers_[p->name].type();
 		auto layer = layers_[p->name];
-		switch (type)
+		switch (type)							// 根据各层的type来构造各层的代码实例
 		{
 		// 读入图像数据
 		case svaf::LayerParameter_LayerType_NONE:
@@ -328,7 +328,7 @@ void Circuit::Build(){
 		}
 
 		CHECK_NOTNULL(layerinstance);
-		p->layer = layerinstance;
+		p->layer = layerinstance;		// 将各层对象实例的地址赋值给链表中的指针
 		p->param = param;
 		param = NULL;
 		LOG(INFO) << "Layer [" << p->name << "] Builded.";
@@ -372,7 +372,7 @@ void Circuit::Run(){
 		LOG(INFO) << "#Frame " << id_ << " Begin: ";
 
 		Mat mat;
-		layers_ >> mat;
+		layers_ >> mat;												// 从数据源中获取一帧图像
 		if (mat.empty()){
 			LOG(WARNING) << "Mat empty, Finish All Process.";
 			sprintf(buf, "Frame %d Begin.", id_);
@@ -380,7 +380,7 @@ void Circuit::Run(){
 			break;
 		}
 		InitStep(); // 初始化
-		images_.push_back(Block("left", mat.clone()));
+		images_.push_back(Block("left", mat.clone()));	// 将该帧图像构造一个Block，并将其push到Block向量列表中
 		RunStep(); // 运行
 		if (!Disp()){
 			break;
@@ -394,6 +394,7 @@ void Circuit::Run(){
 
 
 // 单帧执行
+// 但每层算法都可以通过vector<Block> images_参数对之前的所有帧的数据进行操作
 void Circuit::RunStep(){
 	// 遍历算法链表执行算法
 	void *param = NULL;
@@ -413,6 +414,8 @@ void Circuit::RunStep(){
 // 显示输出
 bool Circuit::Disp(){
 	// 显示或保存图像
+	// 疑问：每一帧图像处理完，都要把之前所有的数据显示一遍吗？
+	// 答  ：每个Layer执行完之后就可以向disp_中push数据，因此处理完一帧之后，disp_中可能会有多个元素	
 	for (int i = 0; i < disp_.size(); ++i){
 		if (disp_[i].isShow){
 			imshow(disp_[i].name, disp_[i].image);
@@ -448,7 +451,8 @@ bool Circuit::Disp(){
 
 // 每帧处理前初始化
 void Circuit::InitStep(){
-	disp_.clear();
+	// 每处理一帧之前，先清空disp_和images_
+	disp_.clear();				
 	images_.clear();
 	world_.fetchtype = 0;
 	world_.x = 0;
@@ -466,7 +470,7 @@ void Circuit::InitStep(){
 	sprintf(idch, "%04d", id_);
 	string timestr = GetTimeString();
 	string idstr(idch);
-	Circuit::time_id_ = timestr + "_" + idstr;
+	Circuit::time_id_ = timestr + "_" + idstr;	// 包含当前时间和帧id
 	sout_.setRow(id_+1);
 }
 
@@ -519,6 +523,7 @@ bool Circuit::ReciveCmd(){
 }
 
 // 向外部进程发送数据格式
+// C++11的新特性，此处的using相当于typedef
 using Bucket = struct{
 	char	head[4];
 	int		msgCount;

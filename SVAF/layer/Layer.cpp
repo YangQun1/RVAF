@@ -7,6 +7,7 @@ Layer基类
 
 namespace svaf{
 
+// 这些静态成员变量是所有Layer共享的
 size_t *Layer::id = NULL;					// 帧id，从0开始
 Figures<> *Layer::figures = NULL;			// 记录结果的二维数据表
 SvafApp Layer::task_type = SvafApp::NONE;	// 用于交互的变量，用于判断界面类型

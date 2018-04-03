@@ -14,6 +14,7 @@ using namespace std;
 namespace svaf{
 
 // 操作数据模板元
+// 图表的每个元素
 template<typename T>
 struct Cell{
 	bool	mask = false;
@@ -25,7 +26,9 @@ struct Cell{
 };
 
 // 数据表模板
-template<typename T = float>
+// 每一列用一个vector来表示，有自己的field名。vector的长度就是图表的行数，
+// 增加列，就是向map中添加一个vector，设置行数就是调整vector的长度
+template<typename T = float>	// 疑问：这里的=float是什么作用？答：默认是float，如Figure<>即等价于Figure<float>
 class Figures{
 public:
 	Figures();
@@ -100,7 +103,7 @@ namespace svaf{
 	// 添加一列
 	template<typename T>
 	void Figures<T>::addCol(string filed){
-		vector<Cell<T>> tempvec
+		vector<Cell<T>> tempvec				// 疑问：什么用法？
 			figure_[filed] = tempvec;
 	}
 
@@ -123,7 +126,7 @@ namespace svaf{
 		if (id >= (*this)[filed].size()){
 
 		}
-		if (id >= figure_.size()){
+		if (id >= figure_.size()){	// 疑问：这个地方为什么要resize？为什么将id跟列数做比较？
 			resize(id + 1);
 		}
 		(*this)[filed][id].val = value;
@@ -157,16 +160,18 @@ namespace svaf{
 	}
 
 	// 输出数据结果到文件
+	// 注：把列打印成行
 	template<typename T>
 	void Figures<T>::print2txt(string filename){
 		FILE* fp = fopen(filename.c_str(), "wb+");
 
+		// 打印行号（水平打印）
 		fprintf(fp, "id\t");
 		for (int i = 0; i < size_; ++i){
 			fprintf(fp, "%5d\t", i);
 		}
 		fprintf(fp, "\r\n");
-
+		// 打印每一列的内容（水平打印）
 		for (auto it : figure_){
 			fprintf(fp, "%s\t", it.first.c_str());
 			for (int j = 0; j < size_; ++j){
@@ -187,18 +192,21 @@ namespace svaf{
 	void Figures<T>::print2txt_im(string filename, vector<string>& images){
 		FILE* fp = fopen(filename.c_str(), "wb+");
 
+		// 打印行号（水平打印）
 		fprintf(fp, "id\t");
 		for (int i = 0; i < size_; ++i){
 			fprintf(fp, "%5d\t", i);
 		}
 		fprintf(fp, "\r\n");
 
+		// 打印name（相当于新的一列）（水平打印）
 		fprintf(fp, "name\t");
 		for (int i = 0; i < size_; ++i){
 			fprintf(fp, "%s\t", images[i].c_str());
 		}
 		fprintf(fp, "\r\n");
 
+		// 打印每一列内容（水平打印）
 		for (auto it : figure_){
 			fprintf(fp, "%s\t", it.first.c_str());
 			for (int j = 0; j < size_; ++j){

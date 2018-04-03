@@ -12,6 +12,7 @@ using namespace std;
 namespace svaf{
 
 // 将目录中的所有文件加入向量列表
+// 将目录中的所有文件名加入到files向量中
 void getFiles(string path, vector<string>& files)
 {
 	//文件句柄  
@@ -40,10 +41,10 @@ void getFiles(string path, vector<string>& files)
 
 // 构造函数，初始执行
 Param::Param(SvafTask& svafTask) : index_(-1), frame_(0){
-	int size = svafTask.layer_size();
+	int size = svafTask.layer_size();	// 算法路线的层数
 	for (int i = 0; i < size; ++i){
 		LayerParameter layer = svafTask.layer(i);
-		layers_[i] = layer;
+		layers_[i] = layer;					// 将各个层的相关信息（名字、类型、顶层、底层、参数等）分别根据层的顺序和名字存储到hash_map中
 		namelayers_[layer.name()] = layer;
 		LOG(INFO) << "Layer " << i << ": " << "name: " << layer.name();
 	}
@@ -57,6 +58,7 @@ Param::~Param()
 }
 
 // 初始化数据资源
+// 该函数将输入数据的文件路径等存到相应的数据结构中，不存储实际的图像数据
 void Param::InitDataSource(){
 	
 	for (int i = 0; i < Size(); ++i){
@@ -71,7 +73,7 @@ void Param::InitDataSource(){
 			runtype_ = layertype;
 			isbinocular_ = false;
 			for (int j = 0; j < layer.imagedata_param().name_size(); ++j){
-				images_.push_back(layer.imagedata_param().name(j));
+				images_.push_back(layer.imagedata_param().name(j));		// 将图像层的图像文件名存到一个vector<string>中
 				LOG(INFO) << "data_source:\n" << layer.imagedata_param().name(j);
 			}
 			break;
@@ -92,7 +94,7 @@ void Param::InitDataSource(){
 			runtype_ = layertype;
 			isbinocular_ = false;
 			for (int j = 0; j < layer.videodata_param().name_size(); ++j){
-				videos_.push_back(layer.videodata_param().name(j));
+				videos_.push_back(layer.videodata_param().name(j));		// videos_中存储的是视频文件的文件名，可以存储多个视频文件
 			}
 			break;
 		case svaf::LayerParameter_LayerType_VIDEO_PAIR:
@@ -109,7 +111,7 @@ void Param::InitDataSource(){
 			// 打开USB相机
 			runtype_ = layertype;
 			isbinocular_ = false;
-			camera_[0] = layer.cameradata_param().camera();
+			camera_[0] = layer.cameradata_param().camera();		// 这个int型变量是可以区分相机的编号？
 			break;
 		case svaf::LayerParameter_LayerType_CAMERA_PAIR:
 			// 打开USB相机对
@@ -173,15 +175,17 @@ void Param::InitDataSource(){
 	}
 }
 
+// 该函数只对视频输入、USB摄像头、DSP相机和kinect相机运行模式下有效，
+// 用于初始化这些文件或设备，做好从中读图像的准备
 void Param::InitVideoState(){
 	int videoframecount2;
-	switch (runtype_)
+	switch (runtype_)	// runtype_总是等于输入层的layertype_
 	{
 	case svaf::LayerParameter_LayerType_VIDEO:
 		// 打开视频文件
 		index_++;
-		cap_[0].open(getVideo());
-		videoframecount_ = cap_[0].get(CV_CAP_PROP_FRAME_COUNT);
+		cap_[0].open(getVideo());												// 打开视频文件，使用OpenCV的VideoCapture
+		videoframecount_ = cap_[0].get(CV_CAP_PROP_FRAME_COUNT);				// 获取视频的总帧数
 		CHECK(cap_[0].isOpened()) << "video 1 open failed.\t" << getVideo();
 		LOG(INFO) << "Video Opened: \n" << getVideo()
 				<< "\tFrameCount:" << videoframecount_;
@@ -221,7 +225,7 @@ void Param::InitVideoState(){
 		break;
 	case svaf::LayerParameter_LayerType_DSP:
 		// 进程间通信获取图像
-		CHECK(dspcamera.open()) << "Base is not run, please open Base program";
+		CHECK(dspcamera.open()) << "Base is not run, please open Base program";	// 使用pc::VideoCapture
 		break;
 	case svaf::LayerParameter_LayerType_DSP_PAIR:
 		// 进程间通信获取图像对
@@ -254,6 +258,9 @@ LayerParameter_LayerType Param::getDataSource() const{
 	return runtype_;
 }
 
+// 运算符重载，根据当前算法路线的runtype_(也就是输入层的layertype_)，
+// 将Param对象中保存的相应类型的数据的源，将实际的数据存储到>>运算符后面的对象中
+// 运算符功能：从数据源读取一幅图像到mat中
 Param& Param::operator>>(Mat& mat){
 	Mat tempframe;
 	switch (runtype_)
@@ -272,9 +279,9 @@ Param& Param::operator>>(Mat& mat){
 	case svaf::LayerParameter_LayerType_VIDEO:
 		frame_++;
 		if (frame_ < videoframecount_){
-			cap_[0] >> mat;
+			cap_[0] >> mat;			// 读取一个视频中的一帧到mat中
 		} else{
-			index_++;
+			index_++;				// 如果一个视频已经全部读完，则release该视频，并打开下一个视频，并读取第一帧到mat中
 			cap_[0].release();
 			if (index_ >= videos_.size()){
 				mat.release();
@@ -322,6 +329,8 @@ Param& Param::operator>>(Mat& mat){
 	return *this;
 }
 
+// 运算符重载，根据当前算法路线的runtype_(也就是输入层的layertype_)，
+// 将Param对象中保存的相应类型的数据的源，将实际的数据存储到>>运算符后面的对象中
 Param& Param::operator>>(pair<Mat, Mat>& matpair){
 	int videoframecount2 = 0;
 	switch (runtype_)
@@ -415,10 +424,14 @@ Param& Param::operator>>(pair<Mat, Mat>& matpair){
 	return *this;
 }
 
+// 运算符重载，对svaf::Param类型的对象使用该运算符，
+// 等价于对该对象的hash_map<int,LayerParameter> layers_成员使用该运算符
 LayerParameter& Param::operator[](int& index){
 	return layers_[index];
 }
 
+// 运算符重载，对svaf::Param类型的对象使用该运算符，
+// 等价于对该对象的hash_map<string,LayerParameter> namelayers_成员使用该运算符
 LayerParameter& Param::operator[](string& str){
 	return namelayers_[str];
 }
@@ -437,6 +450,7 @@ pair<string, string> Param::getImagePair(){
 	return imagepairs_[index_];
 }
 
+// 返回视频文件的文件名
 string Param::getVideo(){
 	if (index_ >= videos_.size()){
 		LOG(ERROR) << "Video total count: " << videos_.size() << ". No Enough Video!";

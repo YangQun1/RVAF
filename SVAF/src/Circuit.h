@@ -28,8 +28,8 @@ struct _Node{
 typedef _Node<string> Node;
 
 typedef struct _World{
-	bool		rectified;
-	int			fetchtype;
+	bool		rectified;			// 什么作用？
+	int			fetchtype;			// 什么作用？
 	float		x, y, z, a, b, c; // 抓取点，和抓取方向，世界坐标
 
 	vector<Point2f> xl, xr;
@@ -49,6 +49,7 @@ struct Color3f{
 	Color3f(float rr, float gg, float bb) : r(rr), g(gg), b{ bb }{}
 };
 
+// 用于存储一幅图像，和从该图像中得到的各种数据（关键点、描述子等）
 typedef struct _Block{
 	string	name;
 	Mat		image;
@@ -78,6 +79,7 @@ typedef struct _Block{
 	_Block() : roi(Rect(0, 0, 0, 0)), isShow(true), isSave(false), isOutput(false), isOutput3DPoint(false), pMatch(NULL){}
 } Block;
 
+// 疑问：这个枚举类型的含义是什么？
 enum SvafApp{
 	NONE = 0, // gui_type = PROTO
 	S_SHOW = 1, // ONE

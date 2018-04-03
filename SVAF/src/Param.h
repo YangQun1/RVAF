@@ -49,11 +49,11 @@ protected:
 	cv::VideoCapture	cap_[2];
 
 private:
-	int		index_;
-	int		frame_;
-	int		videoframecount_;
+	int		index_;									// 当前图像计数，或当前视频文件计数
+	int		frame_;									// 某个视频中的当前帧计数
+	int		videoframecount_;						// 某个视频文件的总帧数
 
-	bool							isbinocular_;
+	bool							isbinocular_;	// 标识是否工作在双目模式下，在InitDataSource()函数执行时，根据输入层的type设置
 	LayerParameter_LayerType		runtype_;
 public:
 	vector<pair<string, string>>	imagepairs_;

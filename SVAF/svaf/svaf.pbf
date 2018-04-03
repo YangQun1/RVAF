@@ -7,6 +7,8 @@ layer{
 	top:	"adaboost"
 	imagedata_param{
 		name:	"G:/RPG/SVAF/AcfDetect/a.jpg"
+		name:	"G:/RPG/SVAF/AcfDetect/b.jpg"
+		name:	"G:/RPG/SVAF/AcfDetect/c.jpg"
 	}
 }
 layer{
@@ -14,8 +16,10 @@ layer{
 	type:	ADABOOST
 	bottom:	"data"
 	top:	"adaboost"
+	show:	true				# show the detection result of adaboost layer
 	adaboost_param{
 		detector:	"G:/RPG/SVAF/AcfDetect/acfCarDetector.dat"
 		thresh:		40.0
 	}
 }
+pause:	0			# pause between each frame until any key is push down
