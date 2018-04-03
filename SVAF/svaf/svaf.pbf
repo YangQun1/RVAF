@@ -23,3 +23,5 @@ layer{
 	}
 }
 pause:	0			# pause between each frame until any key is push down
+
+# add a new line in the end
