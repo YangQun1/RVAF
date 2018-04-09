@@ -18,7 +18,7 @@ namespace svaf{
 AdaboostLayer::AdaboostLayer(LayerParameter& layer) : scaleindex(-1), ksvideo(false), ksframe(false), kseline(false), epoLine(-1), Layer(layer)
 {
 	string	detectorfile = layer.adaboost_param().detector();
-	detector.Open((char*)detectorfile.data()); // 打开分类器文件
+	detector.Open((char*)detectorfile.data()); // 打开分类器文件	// 疑问：这个地方可以替换成将detector成员列表初始化的方式吧？
 
 	thresh = layer.adaboost_param().thresh(); // 检测阈值
 	nms = layer.adaboost_param().nms();	// 非极大抑制因子
@@ -127,14 +127,14 @@ bool AdaboostLayer::ImageDetect(vector<Block>& images, vector<Block>& disp){
 		vector<DetectResult> result;
 		Mat img = images[i].image.clone();
 		__t.StartWatchTimer();
-		AcfDetectImg(img, opt, detector, result, nms);
+		AcfDetectImg(img, opt, detector, result, nms);	// 对输入的每一幅图像进行多尺度的acf检测
 		__t.ReadWatchTimer("Adaboost Image Time");
 		if (__logt){
 			char alicia[3];
 			sprintf(alicia, "%d", i);
 			(*figures)[__name + alicia + "_t"][*id] = (float)__t;
 		}
-		SelectROI(images[i], i, result);
+		SelectROI(images[i], i, result);	// 将每一幅输入图像的检测结果保存到result_rect向量和result_sc向量中
 		if (result.size() > 0)
 			LOG(INFO) << "Box: " << result[0].rs << ", " << result[0].modelHt;
 	}
@@ -178,7 +178,7 @@ bool AdaboostLayer::ScaleDetect(vector<Block>& images, vector<Block>& disp){
 		}
 	}
 
-	// 在后续图像序列中按照之前得到的制度进行搜索
+	// 在后续图像序列中按照之前得到的尺度进行搜索
 	for (; i < images.size(); ++i){
 		vector<DetectResult> result;
 		Mat img = images[i].image.clone();
@@ -245,10 +245,16 @@ bool AdaboostLayer::SelectROI(Block& image, int num, vector<DetectResult>& resul
 		}else{
 			rect.x -= xshift;
 		}
-		if ((rect.x + rect.width) >= image.image.cols || ((rect.y + rect.height) >= image.image.rows)
+		// 修正判别条件：有点目标实际已经被检测出来，但由于太靠近边缘而被忽略
+		/*if ((rect.x + rect.width) >= image.image.cols || ((rect.y + rect.height) >= image.image.rows)
 			|| rect.x <= 0 || rect.y <= 0){
 			continue;
+		}*/
+		if ((rect.x + rect.width) > image.image.cols || ((rect.y + rect.height) > image.image.rows)
+		|| rect.x < 0 || rect.y < 0){
+		continue;
 		}
+
 		result_rect[num].push_back(rect);
 		result_sc[num].push_back(result[i].hs);
 	}

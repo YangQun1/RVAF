@@ -63,8 +63,8 @@ typedef struct _Block{
 	Mat					descriptors;
 	vector<DMatch>		matches;
 
-	_Block*	pMatch;
-	vector<int>		ptidx;
+	_Block*	pMatch;							// 指向匹配图像的指针
+	vector<int>		ptidx;					// 与本图中的特征点匹配的点在匹配图像特征点向量中的索引
 	vector<Point3f>	point3d;
 	vector<Color3f> color3d;
 

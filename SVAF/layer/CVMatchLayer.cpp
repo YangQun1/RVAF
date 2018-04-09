@@ -47,7 +47,7 @@ CVMatchLayer::~CVMatchLayer()
 
 // 运行特征匹配
 bool CVMatchLayer::Run(vector<Block>& images, vector<Block>& disp, LayerParameter& layer, void* param){
-	// 检查图像是否是一堆
+	// 检查图像是否是一对
 	CHECK_GE(images.size(), 2) << "Need Image Pairs";
 	if (images[0].keypoint.empty() || images[1].keypoint.empty()){
 		LOG(ERROR) << "Match Not Run, No Point";
@@ -102,6 +102,7 @@ bool CVMatchLayer::BFL1(vector<Block>& images, vector<Block>& disp){
 	LOG(INFO) << "min distance: " << min_dist;
 	LOG(INFO) << "max distance: " << max_dist;
 
+	// 筛选匹配良好的点对（距离大于两倍最小距离则丢弃掉）
 	for (int i = 0; i < images[0].descriptors.rows; ++i){
 		if (matches[i].distance < 2 * min_dist){
 			images[0].matches.push_back(matches[i]);

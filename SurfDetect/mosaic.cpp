@@ -37,6 +37,7 @@ void iptMatch(const vector<Ipoint>& ipts1, const vector<Ipoint>& ipts2,
 			}
 			dist = sqrt(dist);
 
+			// d1保存最小距离，d2保存次小距离
 			if (dist < d1){
 				d2 = d1;
 				d1 = dist;
@@ -46,6 +47,8 @@ void iptMatch(const vector<Ipoint>& ipts1, const vector<Ipoint>& ipts2,
 			}
 		}
 
+		// 只有拥有显著的匹配关系（距离显著的小于其他点对）
+		// 才被认为是匹配的
 		if (d1 / d2 < 0.65){
 			//ipts1[i].dx = match->x - ipts1[i].x;
 			//ipts1[i].dy = match->y - ipts1[i].y;

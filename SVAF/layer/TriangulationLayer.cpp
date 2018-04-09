@@ -55,7 +55,7 @@ bool TriangulationLayer::Run(vector<Block>& images, vector<Block>& disp, LayerPa
 		}
 		Point2f pt0 = image0.points[i];
 		Point2f pt1 = image1.points[image0.ptidx[i]];
-		pt0.x += image0.roi.x;
+		pt0.x += image0.roi.x;	// ÎªÊ²Ã´£¿
 		pt0.y += image0.roi.y;
 		pt1.x += image1.roi.x;
 		pt1.y += image1.roi.y;

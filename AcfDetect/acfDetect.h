@@ -39,7 +39,7 @@ public:
 	uint32_t* fids;
 	float*    thrs;
 	uint32_t* child;
-	float*    hs;
+	float*    hs;		//  ≤√¥∫¨“Â/
 	float*    weights;
 	uint32_t* depth;
 	uint32_t  treeDepth;

@@ -25,6 +25,7 @@ namespace pc{
 
 float avgLuminance = 0.2f;
 
+// ËÄÉáÎåÈë
 inline double round(double r)
 {
 	return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);

@@ -138,8 +138,8 @@ void AcfDetector::Detect(Channels& chns, int32_t shrink, vector<DetectResult>& r
 	const int32_t width1  = (int32_t)ceil(float(width  * shrink - modelPadWd + 1) / stride);
 
 	// Construct cids array
-	int32_t nFtrs = modelPadHt / shrink * modelPadWd / shrink * nChns;
-	uint32_t *cids = new uint32_t[nFtrs];
+	int32_t nFtrs = modelPadHt / shrink * modelPadWd / shrink * nChns;	// 所有通道的特征数量
+	uint32_t *cids = new uint32_t[nFtrs];	// 每一个特征在全部特征数据中的位置（相对于当前窗口的左上顶点的位置）
 	int32_t m = 0;
 
 	for(int32_t z = 0; z < nChns; z++)
@@ -272,12 +272,24 @@ void AcfDetector::Detect(Channels& chns, int32_t shrink, vector<DetectResult>& r
 	delete [] cids;
 }
 
+/*
+函数功能：
+	对输入的每一幅图像构建acf金字塔，并在每一层金字塔中进行检测，并将筛选之后的检测结果输出
+param_in:
+	img			输入图像
+	opt			金字塔构建参数
+	detector	检测器
+param_out:
+	result		检测结果（包含目标的位置等信息）
+	nms			非最大抑制参数
+*/
 void AcfDetectImg(Mat& img, PyramidOpt& opt, AcfDetector& detector, vector<DetectResult>& result, float nms)
 {
 	Pyramid pyramid;
 	vector<DetectResult> res;
 	int32_t shiftX, shiftY;
 
+	// 构建多通道特征（ACF）金字塔（金字塔每层有十个通道的特征：l,u,v,gradMag.gradHist[6]）
 	ChnsPyramid(img, opt, pyramid);
 
 	result.clear();
@@ -291,7 +303,7 @@ void AcfDetectImg(Mat& img, PyramidOpt& opt, AcfDetector& detector, vector<Detec
 #endif
 	{
 		vector<DetectResult> r0;
-		detector.Detect(pyramid.data[i], opt.chnsOpt.shrink, r0);
+		detector.Detect(pyramid.data[i], opt.chnsOpt.shrink, r0);	// 对每一层进行检测
 		shiftX = (detector.modelPadWd - detector.modelWd) / 2 - opt.pad.width;
 		shiftY = (detector.modelPadHt - detector.modelHt) / 2 - opt.pad.height;
 		for(uint32_t j = 0; j < r0.size(); j++)
@@ -307,7 +319,7 @@ void AcfDetectImg(Mat& img, PyramidOpt& opt, AcfDetector& detector, vector<Detec
 #endif
 			{
 				
-				res.push_back(r);
+				res.push_back(r);	// 将检测结果存在结果向量中
 				
 			}
 		}
@@ -318,6 +330,7 @@ void AcfDetectImg(Mat& img, PyramidOpt& opt, AcfDetector& detector, vector<Detec
 		ChnsDataRelease(pyramid.data[i]);
 	}
 
+	// 对所有结果进行非最大抑制
 	SuppressResult(res, result, nms);
 }
 

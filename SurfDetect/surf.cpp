@@ -30,6 +30,9 @@ namespace pc{
 AlgParam algparam;
 SurfParam suparam;
 
+/*
+同时计算surf关键点和描述子
+*/
 static void surfDetect(uimg& img, vector<Ipoint>& ipts){
 	fimg ii_img;
 	ii_img.data = (float*)calloc(img.cols * img.rows * img.chns, sizeof(float));
@@ -60,6 +63,9 @@ static void surfDetect(uimg& img, vector<Ipoint>& ipts){
 	free(ii_img.data);
 }
 
+/*
+计算surf特征点（关键点、描述子），并绘制在图像上
+*/
 void surfImage(Mat& image){
 	Mat gray;
 	cvtColor(image, gray, CV_BGR2GRAY);
@@ -80,6 +86,9 @@ void surfImage(Mat& image){
 	surfDraw(image, ipts);
 }
 
+// 计算两幅图像的surf特征，进行匹配（暴力匹配），
+// 计算图像之间的变换关系，计算匹配点的3D坐标（调用MATLAB接口）
+// 画出匹配图像
 Mat surfMatch(Mat& image1, Mat& image2){
 	suparam.thresh = (suparam.thresh >= 0) ? suparam.thresh : THRES;
 	suparam.stride = (suparam.stride > 0 && suparam.stride <= 6) ? suparam.stride : STRIDE;
@@ -108,15 +117,15 @@ Mat surfMatch(Mat& image1, Mat& image2){
 		surfDraw(image2, ipts2);
 	}
 	vector<pair<Ipoint, Ipoint>> matches;
-	iptMatch(ipts1, ipts2, matches);
+	iptMatch(ipts1, ipts2, matches);				// 计算两组特征点的匹配关系
 	dimshow("Match", drawMatches(image1, image2, matches));
 	
-	Mat homography = computeHomography(matches);
+	Mat homography = computeHomography(matches);	// 根据匹配关系，计算两幅图像之间的单应矩阵
 	cout << "matched point count: " << matches.size() << endl;
 	if (algparam.runtype == 'U'){
-		print3Dpoint(stereoTriangulation(matches));
+		print3Dpoint(stereoTriangulation(matches));	// 调用MATLAB的接口，根据匹配关系计算得到3D点坐标，并打印出来
 	}
-	return drawMatches(image1, image2, matches);
+	return drawMatches(image1, image2, matches);	// 绘制匹配图像
 }
 
 Mat surfMosaic(Mat& image1, Mat& image2){
@@ -140,12 +149,12 @@ Mat surfMosaic(Mat& image1, Mat& image2){
 	img2.data = gray2.data;
 
 	vector<Ipoint> ipts1, ipts2;
-	surfDetect(img1, ipts1);
+	surfDetect(img1, ipts1);	// 计算surf特征点
 	surfDetect(img2, ipts2);
 	
 	vector<pair<Ipoint, Ipoint>> matches;
-	iptMatch(ipts1, ipts2, matches);
-	Mat homography = computeHomography(matches);
+	iptMatch(ipts1, ipts2, matches);	// 特征点匹配
+	Mat homography = computeHomography(matches);	// 计算单应
 	dimshow( "Homography", drawMatches(image1, image2, matches) );
 
 	if (homography.empty() || homography.rows != 3 || homography.cols != 3){
@@ -168,7 +177,9 @@ Mat surfMosaic(Mat& image1, Mat& image2){
 
 
 /*Interface to svaf*/
-
+/*
+计算surf关键点
+*/
 void SurfPoint(Mat& image, vector<Point2f>& points, vector<float>& scales, vector<int>& label){
 	Mat gray;
 	if (image.channels() == 3){
@@ -226,6 +237,9 @@ void SurfPoint(Mat& image, vector<Point2f>& points, vector<float>& scales, vecto
 	}
 }
 
+/*
+计算surf描述子
+*/
 void SurfDescriptor(Mat& image, vector<Point2f>& points, vector<float>& scales, 
 	vector<vector<float>>& descriptors){
 	Mat gray;
