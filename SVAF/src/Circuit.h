@@ -30,7 +30,7 @@ typedef _Node<string> Node;
 typedef struct _World{
 	bool		rectified;			// 什么作用？
 	int			fetchtype;			// 什么作用？
-	float		x, y, z, a, b, c; // 抓取点，和抓取方向，世界坐标
+	double		x, y, z, a, b, c; // 抓取点，和抓取方向，世界坐标
 
 	vector<Point2f> xl, xr;
 	vector<Point3f> pointL, pointR;	// 空间点在左右相机坐标系中的坐标
@@ -67,6 +67,10 @@ typedef struct _Block{
 	vector<int>		ptidx;					// 与本图中的特征点匹配的点在匹配图像特征点向量中的索引
 	vector<Point3f>	point3d;
 	vector<Color3f> color3d;
+
+	// roi center reverse
+	bool useroi;
+	double xct, yct;
 
 	bool isSave;
 	bool isShow;
