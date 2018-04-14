@@ -30,7 +30,7 @@ typedef _Node<string> Node;
 typedef struct _World{
 	bool		rectified;			// 什么作用？
 	int			fetchtype;			// 什么作用？
-	float		x, y, z, a, b, c; // 抓取点，和抓取方向，世界坐标
+	double		x, y, z, a, b, c; // 抓取点，和抓取方向，世界坐标
 
 	vector<Point2f> xl, xr;
 	vector<Point3f> pointL, pointR;
@@ -67,6 +67,10 @@ typedef struct _Block{
 	vector<int>		ptidx;
 	vector<Point3f>	point3d;
 	vector<Color3f> color3d;
+
+	// roi center reverse
+	bool useroi;
+	double xct, yct;
 
 	bool isSave;
 	bool isShow;
