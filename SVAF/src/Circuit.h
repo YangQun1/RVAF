@@ -33,7 +33,7 @@ typedef struct _World{
 	float		x, y, z, a, b, c; // 抓取点，和抓取方向，世界坐标
 
 	vector<Point2f> xl, xr;
-	vector<Point3f> pointL, pointR;
+	vector<Point3f> pointL, pointR;	// 空间点在左右相机坐标系中的坐标
 	vector<Point3f> pointW; // Left Camera -> world
 
 	vector<Point3f> matchpt1;

@@ -106,7 +106,7 @@ MilTrackLayer::~MilTrackLayer(){
 // 运行双目目标跟踪算法
 bool MilTrackLayer::Run(std::vector<Block>& images, vector<Block>& disp, LayerParameter& layer, void* param){
 	if ((*id) == 0 || reinit_ || (*id) % trackcount_ == 0){
-		trackers_.resize(images.size());
+		trackers_.resize(images.size());			// 输入的每一幅图像对应一个追踪器
 		insize_.resize(images.size());
 		winsize_.resize(images.size());
 		x_factor_.resize(images.size());
@@ -115,7 +115,7 @@ bool MilTrackLayer::Run(std::vector<Block>& images, vector<Block>& disp, LayerPa
 			insize_[i] = images[i].image.size();
 		}
 
-		reinit_ = !InitFirstFrame(images, layer);
+		reinit_ = !InitFirstFrame(images, layer);	// 处理第一帧，在线训练分类器
 		LOG(INFO) << trackers_.size() <<" Trackers Has Been Created.";
 	} else {
 		for (int i = 0; i < images.size(); ++i){
@@ -124,7 +124,7 @@ bool MilTrackLayer::Run(std::vector<Block>& images, vector<Block>& disp, LayerPa
 		TrackFrame(images);
 	}
 
-	if (reinit_){
+	if (reinit_){	// reinit_为true则说明初始化失败
 		LOG(ERROR) << "Init Tracker Failed";
 		LOG(ERROR) << "\nLoop cut short!\n";
 		return false;
@@ -166,7 +166,7 @@ bool MilTrackLayer::TrackFrame(vector<Block>& images){
 bool MilTrackLayer::InitFirstFrame(vector<Block>& images, LayerParameter& layer){
 	vector<Rect> ada_rect;
 	if (init_type_ == MilTrackParameter_InitType_ADABOOST){
-		bool retval = adaboost->RunForOneRect(images, layer, ada_rect);
+		bool retval = adaboost->RunForOneRect(images, layer, ada_rect);	// ada_rect只存储每幅图像中的第一个目标
 		if (!retval){
 			reinit_ = true;
 			LOG(ERROR) << "Adaboost Init Rect Failed.";
@@ -221,7 +221,7 @@ bool MilTrackLayer::InitFirstFrame(vector<Block>& images, LayerParameter& layer)
 		winsize_[i].height = init_rect_.height;
 		
 		// 重新初始化就要重置跟踪参数并计算尺度
-		InitSetParam(trackers_[i]);
+		InitSetParam(trackers_[i]);	// 设置每一个tracker的参数
 		ComputeScale(i);
 	}
 
@@ -232,7 +232,7 @@ bool MilTrackLayer::InitFirstFrame(vector<Block>& images, LayerParameter& layer)
 			cvtColor(trackers_[i].img, trackers_[i].img, CV_BGR2GRAY);
 		}
 		__t.StartWatchTimer();
-		track_firstframe(trackers_[i].img, trackers_[i].rect, trackers_[i].trparam, trackers_[i].ftrparam);
+		track_firstframe(trackers_[i].img, trackers_[i].rect, trackers_[i].trparam, trackers_[i].ftrparam);		// 一个疑问：追踪过程中不考虑目标尺度的变化吗？
 		__t.ReadWatchTimer("MIL InitTrack Time");
 		if (__logt){
 			char alicia[3];
@@ -245,6 +245,7 @@ bool MilTrackLayer::InitFirstFrame(vector<Block>& images, LayerParameter& layer)
 }
 
 // 重置跟踪参数
+// 将pbf中的参数赋值给每一个tracker
 void MilTrackLayer::InitSetParam(BoostTrack& tracker){
 	
 	// MIL特征参数
@@ -283,7 +284,7 @@ void MilTrackLayer::InitSetParam(BoostTrack& tracker){
 
 // 计算缩放尺度（缩小跟踪图像，加快算法处理速度）
 void MilTrackLayer::ComputeScale(int i){
-	if (scalefactor_ > 0){
+	if (scalefactor_ > 0){	// scalefactor_和trsize_一般只会被指定一个
 		//for (int i = 0; i < trackers_.size(); ++i){
 			trackers_[i].rect.x = (int)(init_rect_.x * scalefactor_ + 0.5);
 			trackers_[i].rect.y = (int)(init_rect_.y * scalefactor_ + 0.5);

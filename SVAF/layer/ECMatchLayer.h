@@ -21,7 +21,7 @@ protected:
 	bool ECEular(vector<Block>&);
 	bool ECEularCrossCheck(vector<Block>&);
 private:
-	void debug_showmatch(vector<Block>& images){
+	void debug_showmatch(vector<Block>& images){	// 在一幅图像中显示匹配结果
 		for (int i = 0; i < images[0].matches.size(); ++i){
 			Mat mat0 = images[0].image.clone();
 			Mat mat1 = images[0].pMatch->image.clone();

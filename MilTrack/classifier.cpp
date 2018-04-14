@@ -24,7 +24,7 @@ vector<float> online_classifysetf(Weak& weakclf, vector<pc::Rect> sampleset,
 #endif
 	for (int k = 0; k < sampsize; k++){
 		bool lftrsComputed = ftrsComputed && sampleset.size() > 0 && ftrVal[0].size() > 0;
-		float xx;
+		float xx;	// 每个样本有numFeat个特征，对应同样多个week learner，每个week learner只使用一个特征做分类
 		if (ftrsComputed){
 			xx = ftrVal[weakclf.index][k];
 		}

@@ -29,7 +29,13 @@ void sort_order_des(vector<float>& v, vector<int>& order){
 		}
 	}
 }
-
+/*
+ 函数功能：
+	用选择的所有弱分类器组成的强分类器对所有样本进行分类
+ param：
+ return：
+	所有样本的分类结果
+*/
 vector<float> milclassify(vector<Weak>& weakclf, vector<pc::Rect> sampleset, 
 	vector<vector<float>> ftrVal, fimg ii_img, bool uselogR, TrackParam& trparam){
 	int numsamples = sampleset.size();
@@ -40,9 +46,9 @@ vector<float> milclassify(vector<Weak>& weakclf, vector<pc::Rect> sampleset,
 //#pragma omp parallel for
 //#endif
 	for (uint w = 0; w < trparam.selectors.size(); w++){
-		tr = online_classifysetf(weakclf[trparam.selectors[w]], sampleset, ftrVal, ii_img, false);
+		tr = online_classifysetf(weakclf[trparam.selectors[w]], sampleset, ftrVal, ii_img, false);	// 每个弱分类器对所有样本的结果
 		for (int j = 0; j < numsamples; j++)
-			res[j] += tr[j];
+			res[j] += tr[j];	// 所有样本最终的分类结果：等于所有弱分类器结果的叠加
 	}
 
 	if (!uselogR){
@@ -102,9 +108,9 @@ void mil_trainupdate(uimg img, fimg ii_img, vector<Weak>& weakclf,
 #pragma omp parallel for
 #endif
 	for (int m = 0; m < numftr; m++){														
-		online_trainupdate(weakclf[m], posx.size(), negx.size(), posftrVal, negftrVal); 	
-		pospred[m] = online_classifysetf(weakclf[m], posx, posftrVal, ii_img, true); 
-		negpred[m] = online_classifysetf(weakclf[m], negx, negftrVal, ii_img, true); 
+		online_trainupdate(weakclf[m], posx.size(), negx.size(), posftrVal, negftrVal); 		// 使用新来的样本更新弱分类器参数
+		pospred[m] = online_classifysetf(weakclf[m], posx, posftrVal, ii_img, true);			// 每个弱分类器对正样本的预测结果
+		negpred[m] = online_classifysetf(weakclf[m], negx, negftrVal, ii_img, true);			// 每个弱分类器对负样本的预测结果
 	}
 	
 	// 选择最优特征

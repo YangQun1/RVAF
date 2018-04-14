@@ -52,6 +52,7 @@ void compute_integral(uimg& img, fimg& ii_img){
 }
 
 //extern FeatureParam ftrparam;
+// 只计算每个特征的参数，不计算特征本身
 vector<Haar*> generatefeature(int numFeat, FeatureParam &ftrparam){
 	// 初始化参数
 	ftrparam.useChannels[0] = 0;
@@ -66,7 +67,7 @@ vector<Haar*> generatefeature(int numFeat, FeatureParam &ftrparam){
 
 		haars[i]->width = ftrparam.width;
 		haars[i]->height = ftrparam.height;
-		const int numrects = randint(ftrparam.minRectNum, ftrparam.maxRectNum);
+		const int numrects = randint(ftrparam.minRectNum, ftrparam.maxRectNum);		// 疑问;numrects和numFeat是什么？
 		haars[i]->rects.resize(numrects);
 		haars[i]->weights.resize(numrects);
 		haars[i]->rsums.resize(numrects);
@@ -75,7 +76,7 @@ vector<Haar*> generatefeature(int numFeat, FeatureParam &ftrparam){
 		haars[i]->channel = 0;
 
 		for (int j = 0; j < numrects; j++){
-			haars[i]->weights[j] = randfloat() * 2 - 1;   
+			haars[i]->weights[j] = randfloat() * 2 - 1;		// [-1,1]之间的均匀分布 
 			haars[i]->rects[j].x = randint(0, (uint)(ftrparam.width - 3));
 			haars[i]->rects[j].y = randint(0, (uint)(ftrparam.height - 3));
 			haars[i]->rects[j].width = randint(1, ftrparam.width - haars[i]->rects[j].x - 2);

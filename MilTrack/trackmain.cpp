@@ -18,6 +18,18 @@ using namespace cv;
 
 namespace pc{
 
+/*
+ 函数功能：
+	在当前追踪到的目标位置周围的一定范围内采集样本，样本的size等于目标的size
+ param_in:
+	img:	图像
+	box:	当前目标位置
+	inrad:	范围的外边界
+	outrad:	范围的内边界
+	maxnum:	最大的样本数？
+return：
+	采集到的样本的位置
+*/
 vector<pc::Rect> getsample(uimg& img, pc::Rect box, float inrad,
 					float outrad, int maxnum){
 	vector<pc::Rect> samples;
@@ -26,34 +38,43 @@ vector<pc::Rect> getsample(uimg& img, pc::Rect box, float inrad,
 	float inradsq = inrad*inrad;
 	float outradsq = outrad*outrad;
 
+	// 样本框的左上顶点可以取值的最小和最大的行列值
 	const uint minrow = max(0, (int)box.y - (int)inrad);
 	const uint maxrow = min((int)rowsz - 1, (int)box.y + (int)inrad);
 	const uint mincol = max(0, (int)box.x - (int)inrad);
 	const uint maxcol = min((int)colsz - 1, (int)box.x + (int)inrad);
 
+	// 预留实际可能取到的最多样本框数量的空间
 	samples.resize((maxrow - minrow + 1)*(maxcol - mincol + 1));
 	int i = 0;
 
+	// prob如果大于1，则randfloat<prob永远成立，即满足范围条件的样本全部取出并保留
+	// prob如果小于1，则randfloat<prob成立的概率为prob，
+	// 即随机的从所有可以取得的样本中按照概率取maxnum个（最终可能取不到这么准确，但从概率上来说是这样的）
 	float prob = ((float)(maxnum)) / samples.size();
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
-	for (int r = minrow; r <= maxrow; r++)
+	for (int r = minrow; r <= maxrow; r++){
 		for (int c = mincol; c <= maxcol; c++){
-		const int dist = (box.y - r)*(box.y - r) + (box.x - c)*(box.x - c);
-		if (randfloat()<prob && dist < inradsq && dist >= outradsq){
-			samples[i].x = c;
-			samples[i].y = r;
-			samples[i].height = box.height;
-			samples[i].width = box.width;
-			i++;
+			const int dist = (box.y - r)*(box.y - r) + (box.x - c)*(box.x - c);
+			if (randfloat() < prob && dist < inradsq && dist >= outradsq){
+				samples[i].x = c;
+				samples[i].y = r;
+				samples[i].height = box.height;
+				samples[i].width = box.width;
+				i++;
+			}
 		}
-		}
+	}
 
 	samples.resize(min(i, maxnum));
 	return samples;
 }
 
+/*
+	随机取num个w、h尺寸的框
+*/
 vector<pc::Rect> getsamplenum(uimg& img, uint num, int w, int h){
 	int rowsz = img.rows - h - 1;
 	int colsz = img.cols - w - 1;
@@ -107,7 +128,7 @@ void miltrack_firstframe(Mat& frame, pc::Rect& init_rect, TrackParam& trparam, F
 
 	// 生成特征
 	int numFeat = trparam.numFeat;		//250;
-	trparam.haars = generatefeature(numFeat, ftrparam);
+	trparam.haars = generatefeature(numFeat, ftrparam);	// harr特征的数量是numFeat
 	assert(numFeat == trparam.haars.size());
 
 	// 弱分类器
@@ -180,8 +201,8 @@ void miltrack_frame(Mat& frame, pc::Rect& curt_rect, TrackParam& trparam, Featur
 	prob = milclassify(trparam.weakclf, detectx, ftrValn, ii_img, trparam.uselogR, trparam);
 
 	// 寻找最优位置
-	int bestidx = vecmaxindex(prob);
-	double resp = prob[bestidx];
+	int bestidx = vecmaxindex(prob);	// 可能性最大的框的索引
+	double resp = prob[bestidx];		// 可能性
 
 	curt_rect.x = detectx[bestidx].x;
 	curt_rect.y = detectx[bestidx].y;

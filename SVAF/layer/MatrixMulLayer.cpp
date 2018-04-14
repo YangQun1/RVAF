@@ -18,7 +18,7 @@ MatrixMulLayer::MatrixMulLayer(LayerParameter& layer) : StereoLayer(layer)
 		col[1] = layer.mxmul_param().col1();
 		col[2] = layer.mxmul_param().col2();
 		stringstream ss;
-		for (int i = 0; i < 2; ++i){
+		for (int i = 0; i < 2; ++i){	// bug？只读入了2*3的大小
 			ss.clear();
 			ss << col[i];
 			for (int j = 0; j < 3; ++j){

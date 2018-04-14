@@ -114,7 +114,7 @@ bool AdaboostLayer::RunForOneRect(vector<Block>& images, LayerParameter& layer, 
 		if (result_rect[i].size() == 0){
 			return false;
 		} else{
-			rect.push_back(result_rect[i][0]);
+			rect.push_back(result_rect[i][0]);	// 只保存每幅输入图像中被检测到的第一个目标result_rect[i][0]
 		}
 	}
 

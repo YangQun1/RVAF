@@ -58,6 +58,12 @@ bool ECMatchLayer::Run(vector<Block>& images, vector<Block>& disp, LayerParamete
 	return true;
 }
 
+/*
+ 函数功能：
+	使用欧氏距离为指标，进行两幅图像中特征点的匹配。
+	匹配时默认两图像没有竖直方向上的视差，即匹配的
+	特征点只有横坐标不等，纵坐标相等
+*/
 bool ECMatchLayer::ECEular(vector<Block>& images){
 	int p0_size = images[0].descriptors.rows;
 	int p1_size = images[1].descriptors.rows;
@@ -67,10 +73,10 @@ bool ECMatchLayer::ECEular(vector<Block>& images){
 	vector<vector<int>>	hash1(images[1].image.rows);
 
 	for (int i = 0; i < p0_size; ++i){
-		hash0[images[0].keypoint[i].pt.y].push_back(i);
+		hash0[images[0].keypoint[i].pt.y].push_back(i);	// 把相同纵坐标的特征点的序号放到同一个vector中（相当于散列函数是特征点的纵坐标）
 	}
 	for (int i = 0; i < p1_size; ++i){
-		hash1[images[1].keypoint[i].pt.y].push_back(i);
+		hash1[images[1].keypoint[i].pt.y].push_back(i);	// 同上
 	}
 
 	DMatch match;
@@ -81,7 +87,7 @@ bool ECMatchLayer::ECEular(vector<Block>& images){
 		for (int i = 0; i < p0_size; ++i){
 			match.queryIdx = i;
 			d0 = d1 = FLT_MAX;
-			vector<int>& hashline = hash1[images[0].keypoint[i].pt.y];
+			vector<int>& hashline = hash1[images[0].keypoint[i].pt.y];	// hashline是imag1中所有具有与image0中当前特征点相同纵坐标的特征点的索引的集合（拗口... ）
 			for (int j = 0; j < hashline.size(); ++j){
 				dist = 0.0f;
 				for (int k = 0; k < length; ++k){
@@ -101,7 +107,7 @@ bool ECMatchLayer::ECEular(vector<Block>& images){
 			}
 
 			match.distance = d0;
-			if (d0 / d1 < 0.65){
+			if (d0 / d1 < 0.65){	// 匹配关系明显
 				images[0].matches.push_back(match);
 			}
 		}
@@ -113,7 +119,10 @@ bool ECMatchLayer::ECEular(vector<Block>& images){
 	return true;
 }
 
-bool ECMatchLayer::ECEularCrossCheck(vector<Block>& images){
+/*
+函数实现与ECEular完全相同
+*/
+bool ECMatchLayer::ECEularCrossCheck(vector<Block>& images){	
 	int p0_size = images[0].descriptors.rows;
 	int p1_size = images[1].descriptors.rows;
 	int length = images[0].descriptors.cols;
@@ -169,6 +178,10 @@ bool ECMatchLayer::ECEularCrossCheck(vector<Block>& images){
 	return true;
 }
 
+/*
+ 与ECEular相比，可以匹配多种类型的描述子（float、short、char uchar），
+ 没有仅考虑水平视差的默认约束
+*/
 bool ECMatchLayer::EularMatch(vector<Block>& images){
 	int p1_size = images[0].descriptors.rows;
 	int p2_size = images[1].descriptors.rows;

@@ -42,7 +42,7 @@ typedef struct _Rect{
 	int		height;
 } Rect;
 
-typedef struct _Haar{
+typedef struct _Haar{	// 这些参数代表着什么呢？
 	uint			height;
 	uint			width;
 	uint			channel;
@@ -53,10 +53,10 @@ typedef struct _Haar{
 } Haar;
 
 typedef struct _Weak{
-	bool	trained;
-	int		index;
-	float	lRate;
-	Haar*	ftrs;
+	bool	trained;	// 是否已经被训练
+	int		index;		// 索引
+	float	lRate;		// 学习率
+	Haar*	ftrs;		// 使用的特征
 	
 	float	mu0, mu1, sig0, sig1;
 	float	q;
@@ -76,23 +76,23 @@ struct FeatureParam{
 
 struct TrackParam{
 	int		linewidth				= 2;
-	uint	negnumtrain				= 65;
+	uint	negnumtrain				= 65;		// 负样本数量
 	uint	init_negnumtrain		= 65;
-	float	posradtrain				= 1.0f;  // MIL 4.0  ADA 1.0
-	float	init_postrainrad		= 3.0f;
+	float	posradtrain				= 1.0f;		// MIL 4.0  ADA 1.0
+	float	init_postrainrad		= 3.0f;		// 初始化正样本采集半径
 	uint	posmaxtrain				= 100000;
 	bool	uselogR					= true;
-	uint	srchwinsz				= 25;
+	uint	srchwinsz				= 25;		// 搜索半径
 	uint	negsamplestrat			= 1;
 	uint	count					= 0;
-	pc::Rect	curt_rect;
+	pc::Rect	curt_rect;						// 当前目标的位置
 
 	int				numFeat = 250;
 	int				numSel = 50;
 	float			lRate = 0.85f;
 	vector<int>		selectors;
-	vector<Haar*>	haars;
-	vector<Weak>	weakclf;
+	vector<Haar*>	haars;						// 个数等于numFeat
+	vector<Weak>	weakclf;					// 所有的弱分类器，个数等于numFeat
 
 	int						numsamples;
 	vector<float>			alphas;
@@ -100,7 +100,7 @@ struct TrackParam{
 
 };
 
-struct Binotrack_param{
+struct Binotrack_param{	// 这些参数是做什么用的?
 	bool tss = false;
 	bool sync = false;
 	bool pool = false;
