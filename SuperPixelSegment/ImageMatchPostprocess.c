@@ -75,6 +75,12 @@ void ImppOptimizeWta(IN int *dsi,
     return;
 }
 
+/*
+功能：
+	找到每个像素点的代价最小的视差值
+参数：
+	label: 每个像素点的最优视差
+*/
 void ImppOptimizeWta16Pixel(IN ushort *dsi, 
                             IN int dlength, 
                             IN int num, 

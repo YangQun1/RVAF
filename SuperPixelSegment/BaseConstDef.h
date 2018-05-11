@@ -25,7 +25,7 @@
 ******************************************************************************/
 #define PLATFORM_VC6
 #define PLATFORM_VS2010
-#define PLATFORM_SSE
+#define PLATFORM_SSE 
 // #define PLATFORM_GCC
 // #define PLATFORM_CCS
 

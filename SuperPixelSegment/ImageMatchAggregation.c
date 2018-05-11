@@ -843,13 +843,15 @@ void ImaScanTreeUshortAggrProc(INOUT ImaScanTreeUshortInfo *aggr)
         Lp += LpBufWidth;
     }
 
-    // 行方向进行aggr
+    // 行方向进行aggr，遵循论文中的公式
     cost = imagecost;
     socost = smoothcost;
     for (i = 0; i < height; i++)
     {
+		// 从左向右的aggregation
         StaLineSgmaggrUshort1(cost, height, width, dlength, IMAGE_DIRECT_LEFT, 
                               P1, P2, socost, LpBuf);
+		// 从右向左的aggregation
         StaLineSgmaggrUshort(cost, height, width, dlength, IMAGE_DIRECT_RIGHT, 
                              P1, P2, socost, LpBuf);
         cost += costwidth;
@@ -1407,6 +1409,18 @@ void StaLineSgmaggrUshort1(IN ushort *imagecost,
     return;
 }
 #else
+/*
+功能：
+	沿着指定的方向进行1D的cost累积
+参数：
+	imagecost：每个像素在不同视差下的代价
+	height，width：图像宽高
+	dlength：视差范围
+	begin：方向
+	P1，P2：两个惩罚参数
+	aggrcost：最终所有方向的代价累积（可以理解为在考虑了视差的平滑性之后，每个像素及其邻域内像素的代价累积？？？）
+	LpBuf：单个方向的代价累积
+*/
 void StaLineSgmaggrUshort(IN ushort *imagecost, 
                           IN int height, 
                           IN int width, 
@@ -1521,7 +1535,11 @@ void StaLineSgmaggrUshort(IN ushort *imagecost,
 
     return;
 }
-
+/*
+功能：
+	与StaLineSgmaggrUshort函数基本一致，但是，该函数的aggrcost参数表示的仅仅是一个方向上的累积，因为该函数仅用作
+	第一次的累积，因此，aggrcost和LpBuf是相同的。
+*/
 void StaLineSgmaggrUshort1(IN ushort *imagecost, 
                            IN int height, 
                            IN int width, 

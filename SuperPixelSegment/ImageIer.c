@@ -1074,14 +1074,24 @@ void IerEnforceConnectivity(IN IerInfo *ier)
 	return;
 }
 
+/*
+ 函数功能：
+	根据划分中心的采样间隔（由待采样图像的size和要划分的网格的个数K来确定）
+	来确定横竖方向上的网格划分参数
+ param_in:
+	S0:		采样中心间隔
+	width:	图像的宽（也可以是高）
+ param_out
+	sp:		网格划分参数
+*/
 void MeshSplitSize(INOUT MeshSplitInfo *sp, IN int S0, IN int width)
 {
     int n, n1, n2;
     int S;
     
-    n = width/S0;
-    S = width/n;
-    n2 = width - n*S;
+    n = width/S0;		
+    S = width/n;		
+    n2 = width - n*S;	
     n1 = n - n2;
     sp->S = S;
     sp->n1 = n1;
@@ -1090,6 +1100,14 @@ void MeshSplitSize(INOUT MeshSplitInfo *sp, IN int S0, IN int width)
     return;
 }
 
+/*
+ 函数功能:
+	计算各个网格的几何矩和颜色特性，并初始化网格的label
+ param_in:
+	Sx,Sy:		网格的边长
+	nx,ny:		网格的个数
+	nx1,ny1:	
+*/
 void IerMeshStat(INOUT IerInfo *ier, 
                  IN int Sx,
                  IN int Sy,
@@ -1118,8 +1136,8 @@ void IerMeshStat(INOUT IerInfo *ier,
     int i, j, k, nw;
     int x, y;
     int sx, sy;
-    int x0, y0;
-    int x1, y1;
+    int x0, y0;		
+    int x1, y1;		
     int xx, yy;
     double xc, yc;
     int m00, m01, m10;
@@ -1159,11 +1177,11 @@ void IerMeshStat(INOUT IerInfo *ier,
             // 直接计算几何矩
             m01 = m00*xx/2;
             m10 = m00*yy/2;
-            sumn[k] = m00;
-            sumx[k] = m01;
-            sumy[k] = m10;
-            avgx[k] = xc;
-            avgy[k] = yc;
+            sumn[k] = m00;	// 网格中像素的个数
+            sumx[k] = m01;	// 网格中所有像素的x坐标的和
+            sumy[k] = m10;	// 网格中所有像素的y坐标的和
+            avgx[k] = xc;	// ...x坐标的平均值
+            avgy[k] = yc;	// ...y坐标的平均值
 
             // 统计color sum
             pc = srccolor + x0*channel;
@@ -1210,6 +1228,9 @@ void IerMeshStat(INOUT IerInfo *ier,
     return;
 }
 
+/*
+ 将浮点数用定点表示，功能与IerMeshStat相同，为了提高计算速度
+*/
 void IerMeshStatInt(INOUT IerInfo *ier, 
                     IN int Sx,
                     IN int Sy,

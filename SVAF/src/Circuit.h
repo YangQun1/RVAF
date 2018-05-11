@@ -54,17 +54,17 @@ typedef struct _Block{
 	string	name;
 	Mat		image;
 	Rect	roi;
-	
+	// 自定义的特征点的格式
 	vector<Point2f>	points;
 	vector<float>	points_sc;
 	vector<vector<float>>	despciptors;
-
-	vector<KeyPoint>	keypoint;
-	Mat					descriptors;
-	vector<DMatch>		matches;
+	// opencv的特征点的格式
+	vector<KeyPoint>	keypoint;		// 关键点
+	Mat					descriptors;	// 描述子
+	vector<DMatch>		matches;		// 匹配点对
 
 	_Block*	pMatch;
-	vector<int>		ptidx;
+	vector<int>		ptidx;				// 匹配点在另一幅图像特征点列表中的索引
 	vector<Point3f>	point3d;
 	vector<Color3f> color3d;
 

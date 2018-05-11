@@ -19,8 +19,8 @@ private:
 	int		max_disp;
 	int		factor;
 	int		dispmr;
-	float	r1;
-	float	r2;
+	float	r1;				// P1³Í·£
+	float	r2;				// P2³Í·£
 	string	prefix;
 	bool	savetxt;
 

@@ -48,8 +48,8 @@ typedef struct tagImSgmInfo
     // 参数
     int mode;
     int dispmr;         // 后处理label的中值滤波半径
-    float r1;
-    float r2;
+    float r1;			// P1惩罚
+    float r2;			// P2惩罚
 
     // 内部信息
     ushort *imagecost;

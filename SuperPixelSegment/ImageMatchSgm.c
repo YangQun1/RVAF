@@ -43,6 +43,7 @@ void ImageMatchSgmInit(INOUT ImSgmInfo *Sgm)
     ImaScanTreeUshortInfo *aggr = &Sgm->aggr;
     ImppInvalidInfo *invalid = &Sgm->invalid;
 
+	// 为每个像素点在不同视差下的代价分配空间
     Sgm->imagecost = mm_MallocType(ushort, height*width*dlength);
 
     ImaScanTreeUshortAggrPara(aggr);
@@ -53,7 +54,8 @@ void ImageMatchSgmInit(INOUT ImSgmInfo *Sgm)
     ImaScanTreeUshortAggrInit(aggr);
 
     ImppInvalidInit(invalid, area);
-    
+
+    // 为输出视差图分配内存
     Sgm->left = MallocType(PIXEL, area);
     Sgm->right = MallocType(PIXEL, area);
     Sgm->sparse = MallocType(PIXEL, area);

@@ -378,6 +378,18 @@ void ImcDsiReverseInt(IN int *dsi,
     return;
 }
 
+/*
+功能：
+	根据输入的两幅图像计算其census图像，然后计算其中的每个像素点在不同的视差下的cost
+参数：
+	imageL, imageR: 输入的图像
+	dlength:可能的视差范围
+	cw, ch: 计算census的窗口的半宽高
+	mcost: 可能的最大的cost，等于census窗口的大小
+	pixeldsi: 最终计算得到的cost
+说明：
+	所有的操作基于灰度图像
+*/
 void ImcPaperCensusUshort(IN IMAGE_S *imageL,
                           IN IMAGE_S *imageR,
                           IN int dlength,
@@ -529,6 +541,16 @@ void ImcImageCensusUshort(IN IMAGE_S *imageL,
     return;
 }
 #else
+/*
+功能：
+	计算每一个像素点在不同的depth下的cost，cost的计算基于census，统计两个census中的不同的位的个数
+参数：
+	censusL32、censusR32: 输入的两个图像的census
+	imagedsi：输出的每个像素点的cost
+	dlength：输入的，可能的视差范围
+说明：
+	对边界进行了特殊的处理，防止边界像素坐标减去视差后不再在图像范围内了
+*/
 void CensusCostUshort(IN IMAGE32_S *censusL32, 
                       IN IMAGE32_S *censusR32,
                       IN int dlength,
@@ -562,8 +584,9 @@ void CensusCostUshort(IN IMAGE32_S *censusL32,
             cl = CL[x];
             for (d = 0;d <= maxd;d++)
             {
+				// 计算当前像素点在不同的depth下的cost
                 cr = CR[x - d];
-                temp = cl ^ cr;
+                temp = cl ^ cr;	// 两个census做异或求差异
 
 #ifdef PLATFORM_SSE
                 pdsi[d] = (ushort)_mm_popcnt_u32(temp);

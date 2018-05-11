@@ -27,6 +27,7 @@ Mat SuperPixelSegment(Mat& image, int K, int M, bool optint, bool saveseg, strin
 	IerInfo ier;
 	int height, width, channel;
 
+	// 将img中的图像数据转存到自定义的结构体中
 	Mat mat_empty;
 	if (!MatRead(image, &srcImage8)){
 		return mat_empty;

@@ -91,10 +91,13 @@ typedef struct tagIerConnectInfo
 
 typedef struct tagMeshSplitInfo
 {
-    int S;
-    int n;
-    int n1;
-    int n2;
+    int S;		// 网格的边长（单位为像素）
+    int n;		// 划分的网格数量
+    int n1;		// n1=n-n2,第1~n1个各自，边长为S，
+				// n1到n共n2个像素边长为S+1，这样，正好能划分完
+    int n2;		// n2=width-n*S,
+				// 即如果按照初始设定的各自边长划分，
+				// 将会产生的不能被划分为整个格子的像素个数
 
 }MeshSplitInfo;
 
@@ -113,25 +116,26 @@ typedef struct tagIerInfo
     int K;                  // Superpixel number
     int S;                  // sqrt(Superpixel size) 聚类中心采样间隔
     floatier normC;         // 颜色归一化因子 (1-40)
-    floatier normS;         // 空间归一化因子
+    floatier normS;         // 空间归一化因子，初始超像素中心采样间隔
     int maxiter;
 
     // 输出标记信息
     int *label;
 
     // 聚类中心
-    int num;
-    int *sumn;
-    int *sumx;
-    int *sumy;
+    int num;		// 聚类中心个数
+    int *sumn;		// 网格中像素的个数
+    int *sumx;		// 网格中所有像素的x坐标的和
+    int *sumy;		// 网格中所有像素的y坐标的和
 
-    floatier *sumc;
-    floatier *avgc;
-    floatier *avgx;
-    floatier *avgy;
+
+    floatier *sumc;	// 网格中所有像素的颜色值的和	
+    floatier *avgc;	// 网格中所有像素的颜色值的平均值
+    floatier *avgx;	// 网格中所有像素的x坐标的平均值
+    floatier *avgy;	// 网格中所有像素的y坐标的平均值
     floatier wxy;
     
-    int *avgxi;
+    int *avgxi;		// 意义同上，用定点数存储
     int *avgyi;
     int *sumci;
     int *avgci;
