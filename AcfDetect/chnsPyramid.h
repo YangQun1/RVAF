@@ -26,13 +26,13 @@ namespace pc{
 typedef struct
 {
 	ChannelsOpt	chnsOpt;
-	int32_t		nPerOct;
-	int32_t		nOctUp;
-	int32_t		nApprox;
-	vector<float> lambdas;
-	Size		pad;
-	Size		minDs;
-	int32_t		smooth;
+	int32_t		nPerOct;	// 金字塔的同一个octave中有多少个层（an octave is the set of scales up to half of the initial scale）
+	int32_t		nOctUp;		// 比原始图像尺度大的octave
+	int32_t		nApprox;	// 每个octave中有多少个中间层特征采用近似计算
+	vector<float> lambdas;	// The parameter "lambdas" determines how the channels are normalized
+	Size		pad;		// controls the amount the channels are padded after being created(useful for detecting objects near boundaries)
+	Size		minDs;		// smallest scale of the pyramid
+	int32_t		smooth;		// controls the amount of smoothing after the channels are created(and controls the integration scale of the channels)
 } PyramidOpt;
 
 typedef struct

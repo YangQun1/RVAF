@@ -88,20 +88,21 @@ bool AdaboostLayer::Run(vector<Block>& images, vector<Block>& disp, LayerParamet
 	}
 	bool ret = ResultROI(images, disp);
 
-	if (ret){
-		for (int i = 0; i < images.size(); ++i){
-			images[i].xct = images[i].roi.x + images[i].roi.width / 2.0;
-			images[i].yct = images[i].roi.y + images[i].roi.height / 2.0;
-		}
-		if (images.size() == 2){
-			images[1].useroi = true;
-			images[0].useroi = true;
-		} else{
-			images[1].useroi = false;
-			images[0].useroi = false;
-		}
-	}
-	
+	// TODO:弄清这段代码的作用
+	//if (ret){
+	//	for (int i = 0; i < images.size(); ++i){
+	//		images[i].xct = images[i].roi.x + images[i].roi.width / 2.0;
+	//		images[i].yct = images[i].roi.y + images[i].roi.height / 2.0;
+	//	}
+	//	if (images.size() == 2){
+	//		images[1].useroi = true;
+	//		images[0].useroi = true;
+	//	} else{
+	//		images[1].useroi = false;
+	//		images[0].useroi = false;
+	//	}
+	//}
+	//
 
 	return ret;
 }

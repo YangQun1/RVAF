@@ -36,18 +36,18 @@ typedef struct _DetectResult
 class AcfDetector
 {
 public:
-	uint32_t* fids;
-	float*    thrs;
-	uint32_t* child;
-	float*    hs;
-	float*    weights;
-	uint32_t* depth;
-	uint32_t  treeDepth;
-	uint32_t  nTrees, nTreeNodes;
-	uint32_t  stride;
-	int32_t   cascThr;
-	int32_t   modelHt, modelWd;
-	int32_t   modelPadHt, modelPadWd;
+	uint32_t* fids;						// [K x nWeak] feature id for each nodes
+	float*    thrs;						// [K x nWeak] threshold corresponding to each fids
+	uint32_t* child;					// [K x nWeak] index of (right)child for each node£¬if child == 0,this node is a leaf node
+	float*    hs;						// [K x nWeak] log ratio (.5*log(p/(1-p)) at each node
+	float*    weights;					// [K x nWeak] total sample weight at each node
+	uint32_t* depth;					// [K x nWeak] depth of each node
+	uint32_t  treeDepth;				// depth of all leaf nodes (or 0 if leaf depth varies)
+	uint32_t  nTrees, nTreeNodes;		// nTrees the number of decision trees,nTreeNodes the node number of one decision tree
+	uint32_t  stride;					// spatial stride between detection windows
+	int32_t   cascThr;					// constant cascade threshold (affects speed/accuracy)
+	int32_t   modelHt, modelWd;			// model height+width without padding (eg [100 41])
+	int32_t   modelPadHt, modelPadWd;	// model height+width with padding (eg [128 64])
 
 	AcfDetector(char* path);
 	AcfDetector(){};

@@ -1,25 +1,131 @@
-# configure text
-version: "v0.1"
+name:	"Point Cloud SAC-IA Demo"
+version:	"v_1.22"
+pause:	0
 layer{
 	name:	"data"
-	type:	IMAGE
-	bottom: "data"
+	type:	IMAGE_PAIR
+	bottom:	"data"
+	top:	"rectify"
+	data_param{
+		color: true
+	}
+	imagepair_param{
+		pair{
+			left: "C:/Program Files/MATLAB/R2017a/mytoolbox/calibration/calibration-demo/left_28.bmp";
+			right: "C:/Program Files/MATLAB/R2017a/mytoolbox/calibration/calibration-demo/right_28.bmp"
+		}
+		pair{
+			left: "C:/Program Files/MATLAB/R2017a/mytoolbox/acfdetect/database/positive/L_171103092149153.jpg";
+			right: "C:/Program Files/MATLAB/R2017a/mytoolbox/acfdetect/database/positive/R_171103092149153.jpg"
+		}
+		pair{
+			left: "C:/Program Files/MATLAB/R2017a/mytoolbox/acfdetect/database/positive/L_171103092332338.jpg";
+			right: "C:/Program Files/MATLAB/R2017a/mytoolbox/acfdetect/database/positive/R_171103092332338.jpg"
+		}
+	}
+}
+layer{
+	name:	"rectify"
+	type:	RECTIFY
 	top:	"adaboost"
-	imagedata_param{
-		name:	"G:/RPG/SVAF/AcfDetect/a.jpg"
-		name:	"G:/RPG/SVAF/AcfDetect/b.jpg"
-		name:	"G:/RPG/SVAF/AcfDetect/c.jpg"
+	rectify_param{
+		filename:	"C:/Program Files/MATLAB/R2017a/mytoolbox/calibration/calibration-demo/rectify.dat"
 	}
 }
 layer{
 	name:	"adaboost"
 	type:	ADABOOST
-	bottom:	"data"
-	top:	"adaboost"
-	show:	true				# show the detection result of adaboost layer
+	top:	"eadp"
 	adaboost_param{
-		detector:	"G:/RPG/SVAF/AcfDetect/acfCarDetector.dat"
-		thresh:		40.0
+		detector:	"C:/Program Files/MATLAB/R2017a/mytoolbox/acfdetect/models/detector.dat"
+		sync_frame:	true
+		#sync_video:	true
+		sync_epipolar:	true
+		thresh:		30
+		nms:		0.3
 	}
+	show: true
 }
-pause:	0			# pause between each frame until any key is push down
+layer{
+	name:	"eadp"
+	type:	EADP_MATCH
+	top:	"3dpoint"
+	eadp_param{
+		max_disp:	24
+		factor:		2560
+		#r1:			30
+		#r2:			500
+	}
+	show:	true
+}
+layer{
+	name:	"3dpoint"
+	type:	TRIANG
+	top:	"camera2world"
+	triang_param{
+		visible:	false
+		savepc:		true
+		toolbox_dir:	"C:/Program Files/MATLAB/R2017a/mytoolbox/calibration/toolbox/"
+		calibmat_dir:	"C:/Program Files/MATLAB/R2017a/mytoolbox/calibration/calibration-demo/"
+	}
+	show: true
+	save: false
+}
+layer{
+	name:	"camera2world"
+	type:	MXMUL
+	top:	"pointcloud"
+	mxmul_param{
+		filename:	"C:/Program Files/MATLAB/R2017a/mytoolbox/calibration/calibration-demo/camera2world_rectified.dat"
+	}
+	save:  true
+}
+layer{
+	name:	"pointcloud"
+	type:	IA_EST
+	top:	"pointcloud"
+	sacia_param{
+		pcd_filename:	"E:/RPG/SVAF/SVAF/tmp/W_171107103512353_0003.pcd"
+		ia_param{
+			max_iter:	500
+			min_cors:	3.0
+			max_cors:	1000.0
+			voxel_grid:	3.0
+			norm_rad:	20.0
+			feat_rad:	50.0
+		}
+		coor_param{
+			x:	732.29
+			y:	-85.57
+			z:	33.23
+		}
+	}
+	#show: true
+	#save: true
+}
+
+# configure text
+# version: "v_1.22"
+# layer{
+# 	name:	"data"
+# 	type:	IMAGE
+# 	bottom: "data"
+# 	top:	"adaboost"
+# 	imagedata_param{
+# 		name:	"E:/RPG/SVAF/AcfDetect/a.jpg"
+# 		name:	"E:/RPG/SVAF/AcfDetect/b.jpg"
+# 		name:	"E:/RPG/SVAF/AcfDetect/c.jpg"
+# 	}
+# }
+# layer{
+# 	name:	"adaboost"
+# 	type:	ADABOOST
+# 	bottom:	"data"
+# 	top:	"adaboost"
+# 	show:	true				# show the detection result of adaboost layer
+# 	adaboost_param{
+# 		detector:	"E:/RPG/SVAF/AcfDetect/acfCarDetector.dat"
+# 		thresh:		40.0
+# 	}
+# }
+# pause:	0			# pause between each frame until any key is push down

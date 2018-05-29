@@ -139,9 +139,11 @@ void AcfDetector::Detect(Channels& chns, int32_t shrink, vector<DetectResult>& r
 
 	// Construct cids array
 	int32_t nFtrs = modelPadHt / shrink * modelPadWd / shrink * nChns;
-	uint32_t *cids = new uint32_t[nFtrs];
+	uint32_t *cids = new uint32_t[nFtrs];	
 	int32_t m = 0;
 
+	// cids中存储的是每个滑动窗口中的其他特征与窗口左上角像素第一个通道特征在内存中的相对位置
+	// 有了cids，可以更加方便的从一帧图像的全部特征数据中，将当前滑动窗口的特征数据提取出来
 	for(int32_t z = 0; z < nChns; z++)
 	{
 		for(int32_t c = 0; c < modelPadWd / shrink; c++)
@@ -183,7 +185,7 @@ void AcfDetector::Detect(Channels& chns, int32_t shrink, vector<DetectResult>& r
 					break;
 				}
 			}
-
+			// 每个滑动窗口的起始像素的第一通道特征在内存中的位置
 			float h = 0, *chns1 = chns.data + (r * stride / shrink) * width + (c * stride / shrink);
 			if(treeDepth == 1)
 			{
@@ -235,15 +237,20 @@ void AcfDetector::Detect(Channels& chns, int32_t shrink, vector<DetectResult>& r
 				// general case (variable tree depth)
 				for(uint32_t t = 0; t < nTrees; t++)
 				{
+					// @brief: 使用当前的决策树，根据相应的特征进行分类
+					// @param:
+					//		offset: 当前决策树的根节点的索引
+					//		k:		第k个节点的索引
+					//		k0:		当前子树的根节点的索引
 					uint32_t offset = t * nTreeNodes, k = offset, k0 = k;
 					while(child[k])
 					{
-						float ftr = chns1[cids[fids[k]]];
-						k = (ftr < thrs[k]) ? 1 : 0;
-						k0 = k = child[k0] - k + offset;
+						float ftr = chns1[cids[fids[k]]];	// fids[k]为第k个节点需要的特征的id，cids[fids[k]]是相应的特征在内存中的索引
+						k = (ftr < thrs[k]) ? 1 : 0;		// 根据特征值与阈值的关系，转到左子树或者右子树
+						k0 = k = child[k0] - k + offset;	// 计算当前子树的根节点给k0
 					}
-					h += hs[k];
-					if(h <= cascThr)
+					h += hs[k];								// 累加多个week clf的输出
+					if(h <= cascThr)						// 如果小于阈值，说明是neg class 直接退出，soft cascade
 					{
 						break;
 					}

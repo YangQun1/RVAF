@@ -39,7 +39,7 @@ typedef struct
 
 typedef struct
 {
-	int32_t shrink;
+	int32_t shrink;					// determines the amount to subsample the computed channels £¨in applications such as detection, subsampling does not affect performance£©
 	int32_t colorSmooth;
 	int32_t gradMagNormRad;
 	float   gradMagNormConst;
