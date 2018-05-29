@@ -786,7 +786,7 @@ void ImageShow(IN char* filename, IN IMAGE_S *img, IN RECT_S *rect)
     ImageHustsong2OpenCv(img, pNewImg, rect);
 
     cvShowImage(filename, pNewImg);
-	cvWaitKey(1);
+	cvWaitKey(0);
 	cvReleaseImage( &pNewImg );
 }
 

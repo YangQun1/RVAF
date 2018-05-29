@@ -2,9 +2,8 @@
 //
 
 #include <iostream>
-#include <opencv.hpp>
-#include <opencv.hpp>
-#include <Kinect.h>
+#include <opencv2\opencv.hpp>
+//#include <Kinect.h>
 using namespace cv;
 
 //#pragma comment(lib, "kinect20.lib")
@@ -12,16 +11,20 @@ using namespace cv;
 void TestImageMatchEadp(int argc, char** argv);
 void TestImageMatchSgm(int argc, char** argv);
 void TestImageSupixSeg(int argc, char** argv);
-void SuperPixelSegment(IplImage* pIamge);
+void SuperPixelSegment(IplImage* pImage, int K);
 
 int main(int argc, char* argv[]){
 	//SuperPixelSegment();
 
 #ifndef KINECT
+	/*
 	TestImageMatchEadp(argc, argv);
 	TestImageMatchSgm(argc, argv);
-	/*IplImage *im = cvLoadImage("0.bmp",CV_LOAD_IMAGE_UNCHANGED);
-	SuperPixelSegment(im);*/
+	*/
+	IplImage *im = cvLoadImage("E:\\RPG\\SVAF\\imgs\\rgb.png",CV_LOAD_IMAGE_UNCHANGED);
+	cvShowImage("orignal", im);
+	cvWaitKey(0);
+	SuperPixelSegment(im, 500);
 #else
 	HRESULT hResult = S_OK;
 	IKinectSensor *kinect;

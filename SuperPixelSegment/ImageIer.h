@@ -66,17 +66,17 @@ typedef double              floatier;
 // 边缘像素队列
 typedef struct tagIerEdgeQueue
 {
-    POINT3D_S *curQueue;
-    POINT3D_S *nextQueue;
-    int curQueueNum;
-    PIXEL *queueflag;
-    int *labelflag;
-    int *changeflag;
-    int *changeIndex;
+    POINT3D_S *curQueue;		// 用来存放超像素边缘点，申请图像大小个内存单位
+    POINT3D_S *nextQueue;		// ？？，申请图像大小个单位的内存空间
+    int curQueueNum;			// 当前队列中边缘点的个数
+    PIXEL *queueflag;			// ？？，申请2倍图像大小个内存空间
+    int *labelflag;				// ？？，申请 K+2 个单位的内存空间
+    int *changeflag;			// ？？，申请 K 个单位的内存空间
+    int *changeIndex;			// ？？，Q->changeIndex = MallocType(int, size);
     int changeNum;
 
-    int *nbIndex;
-    int *nbNumber;
+    int *nbIndex;				// ？？，Q->nbIndex = MallocType(int, IER_MAX_NBNUM*size);
+    int *nbNumber;				// ？？，Q->nbNumber = MallocType(int, size);
 
 }IerEdgeQueue;
 

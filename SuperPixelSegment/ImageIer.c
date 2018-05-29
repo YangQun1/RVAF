@@ -213,6 +213,12 @@ void IerConnectInfoDestroy(OUT IerConnectInfo *connect, IN int size, IN int K)
     FreeType(connect->conxy, int, size);
 }
 
+/*
+yq:
+根据设定的参数（图像宽高、聚类中心个数）将原图像划分成矩形的网格（mesh），然后为每个网格
+中的像素分配初始的超像素标记label，同一个mesh中有的像素的label相同，并且计算每个初始超
+像素（mesh）的几何矩和颜色均值等特性，放到由iter管理的相应内存位置
+*/
 void IerPixelInit(IN IerInfo *ier)
 {
     int height = ier->height;
@@ -249,7 +255,7 @@ void IerPixelRefine(IN IerInfo *ier)
     // 边缘优化
     memset(Q->labelflag, FALSE, (ier->num+2)*sizeof(int));
     Q->labelflag[0] = TRUE;
-    IerEdgeInitDetect(ier, 1);
+    IerEdgeInitDetect(ier, 1);							// 把超像素边缘的像素取出放到队列中
     if (optint == 0)    IerEdgeRefine(ier);
     else                IerEdgeRefineInt(ier);
 
